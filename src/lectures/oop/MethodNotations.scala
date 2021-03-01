@@ -19,7 +19,7 @@ object MethodNotations extends App {
 
     def learns(anything: String): String = s"$name learns $anything"
 
-    def learnsScala(): String = this.learns("Scala")
+    def learnsScala(): String = this learns "Scala"
 
     // 4 exercise
     def apply(times: Int): String = s"$name watched $favoriteMovie $times times"
