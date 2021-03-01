@@ -29,7 +29,7 @@ object Generics extends App {
   class CovariantList[+A]
   val covariantAnimalList: CovariantList[Animal] = new CovariantList[Cat]
         // any implementation of animal is valid
-  // animalList.add(new Dog) ??? should turn into a list of animals
+  // animalList.add(new Dog) => it should turn animalList into a list of animals instead of cats or dogs
 
   // 2. No = invariance
   class InvariantList[A]
