@@ -97,6 +97,20 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
     val sortedTail = t.sort(sortFn)
     insert(h, sortedTail)
   }
+  /*
+    * Instructor Implementation (not tail recursive)
+    *
+    def sort(sortFn: (A, A) => Int): MyGenericList[A] = {
+      def insert(head: A, sortedTailList: MyGenericList[A]): MyGenericList[A] = {
+        if(sortedTailList.isEmpty()) GCons(head, GEmpty)
+        else if(sortFn(head, sortedTailList.head()) < 0) GCons(head, sortedTailList)
+        else GCons(sortedTailList.head(), insert(head, sortedTailList.tail()))
+      }
+      val sortedTail = t.sort(sortFn)
+      insert(h, sortedTail)
+    }
+    *
+   */
 
   def zipWith[B >: A, C](anotherList: MyGenericList[B], zipFn: (A, B) => C): MyGenericList[C] = {
     if (anotherList.isEmpty()) throw new Exception("Lists do not have the same length")
