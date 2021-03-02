@@ -67,21 +67,16 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
 
 object GenericListTest extends App {
   val listInt: MyGenericList[Int] = GCons(1, GCons(2, GCons(3, GCons(4, GEmpty))))
-  val listStr: MyGenericList[String] = GCons("Hello", GCons("Scala", GEmpty))
-  val langsList: MyGenericList[String]  = GCons("Elixir", GCons("Scala", GCons("Java", GEmpty)))
 
-  val doubler = new ((Int) => Int) {
-    override def apply(value: Int): Int = value * 2
-  }
+  val doubler = (n: Int) => 2 * n
 
-  val evenCheck = new ((Int) => Boolean) {
-    override def apply(value: Int): Boolean = value % 2 == 0
-  }
+  val evenCheck = (n: Int) => n % 2 == 0
 
-  val doubledList = listInt.map(doubler)
-  val evenList = listInt.filter(evenCheck)
+  val doublerList = (n: Int) => GCons(n, GCons(n * 2, GEmpty))
 
   println(listInt)
-  println(doubledList)
-  println(evenList)
+  println(listInt.filter(evenCheck))
+  println(listInt.map(doubler))
+  println(listInt.map(doublerList))
+  println(listInt.flatMap(doublerList))
 }
