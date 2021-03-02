@@ -60,4 +60,37 @@ object HOFsAndCurries extends App {
      3. compose(f,g) => x => f(g(x))
         andThen(f,g) => x => g(f(x))
    */
+
+
+  // 2
+
+  val toCurry : ((Int, Int) => Int) => Int => Int => Int  = { fn =>
+      (a: Int) => (b: Int) => fn(a,b)
+  }
+
+  val curriedFn = toCurry(_+_)
+  println(curriedFn(1)(2))
+
+  val fromCurry: (Int => Int => Int) => (Int, Int) => Int = { fn =>
+    (a: Int, b: Int) => fn(a)(b)
+  }
+
+  val notCurriedFn = fromCurry(curriedFn)
+  println(notCurriedFn(1, 2))
+
+  // 3
+
+  val compose = { (f: Int => Int, g: Int => Int) =>
+    (x: Int) => f(g(x))
+  }
+
+  val composedFn = compose(a => a * 2, b => b - 5)
+  println(composedFn(10))
+
+  val andThen = { (f: Int => Int, g: Int => Int) =>
+    (x: Int) => g(f(x))
+  }
+
+  val andThenFn = andThen(a => a * 2, b => b - 5)
+  println(andThenFn(10))
 }
