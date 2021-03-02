@@ -89,10 +89,10 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
 
   def sort(sortFn: (A, A) => Int): MyGenericList[A] = {
     @tailrec
-    def insert(value: A, sortedList: MyGenericList[A], listAcc: MyGenericList[A] = GEmpty): MyGenericList[A] = {
-      if(sortedList.isEmpty()) listAcc ++ GCons(value, GEmpty)
-      else if(sortFn(value, sortedList.head()) < 0) listAcc ++ GCons(value, sortedList)
-      else insert(value, sortedList.tail(), listAcc ++ GCons(sortedList.head(), GEmpty))
+    def insert(head: A, sortedTailList: MyGenericList[A], sortedListAcc: MyGenericList[A] = GEmpty): MyGenericList[A] = {
+      if(sortedTailList.isEmpty()) sortedListAcc ++ GCons(head, GEmpty)
+      else if(sortFn(head, sortedTailList.head()) < 0) sortedListAcc ++ GCons(head, sortedTailList)
+      else insert(head, sortedTailList.tail(), sortedListAcc ++ GCons(sortedTailList.head(), GEmpty))
     }
     val sortedTail = t.sort(sortFn)
     insert(h, sortedTail)
