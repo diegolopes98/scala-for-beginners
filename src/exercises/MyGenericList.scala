@@ -85,6 +85,7 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
   }
 
   def sort(sortFn: (A, A) => Int): MyGenericList[A] = {
+    @tailrec
     def insert(value: A, sortedList: MyGenericList[A], listAcc: MyGenericList[A] = GEmpty): MyGenericList[A] = {
       if(sortedList.isEmpty()) listAcc ++ GCons(value, GEmpty)
       else if(sortFn(value, sortedList.head()) < 0) listAcc ++ GCons(value, sortedList)
