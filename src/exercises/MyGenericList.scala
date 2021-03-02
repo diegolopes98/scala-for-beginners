@@ -28,6 +28,10 @@ class FPLangPredicate(languages: List[String]) extends MyPredicate[String] {
   def test(value: String): Boolean = languages.map(lang => lang.toLowerCase).contains(value.toLowerCase)
 }
 
+class CurrentAndDoubleFlatMapTransformer extends MyTransformer[Int, MyGenericList[Int]] {
+  def transform(value: Int): MyGenericList[Int] = new GCons[Int](value, new GCons[Int](value * 2, new GCons[Int](value * 3, GEmpty)))
+}
+
 abstract class MyGenericList[+A] {
   def head(): A
   def tail(): MyGenericList[A]
@@ -39,6 +43,11 @@ abstract class MyGenericList[+A] {
   def map[B](transformer: MyTransformer[A, B]): MyGenericList[B]
 
   def filter(predicate: MyPredicate[A]): MyGenericList[A]
+
+  def flatMap[B](transformer: MyTransformer[A, MyGenericList[B]]): MyGenericList[B]
+
+  // concatenation
+  def ++[ B >: A](list: MyGenericList[B]): MyGenericList[B]
 }
 
 object GEmpty extends MyGenericList[Nothing] {
@@ -50,7 +59,8 @@ object GEmpty extends MyGenericList[Nothing] {
 
   def map[B](transformer: MyTransformer[Nothing, B]): MyGenericList[Nothing] = this
   def filter(predicate: MyPredicate[Nothing]): MyGenericList[Nothing] = this
-
+  def flatMap[B](transformer: MyTransformer[Nothing, MyGenericList[B]]): MyGenericList[B] = this
+  def ++[ B >: Nothing](list: MyGenericList[B]): MyGenericList[B] = list
 }
 
 class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
@@ -67,13 +77,24 @@ class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
   def map[B](transformer: MyTransformer[A, B]): MyGenericList[B] =
     new GCons(
       transformer.transform(h),
-      tail().map(transformer)
+      t.map(transformer)
     )
 
   def filter(predicate: MyPredicate[A]): MyGenericList[A] = {
     val condition = predicate.test(h)
     if(condition) new GCons(h, t.filter(predicate))
     else t.filter(predicate)
+  }
+
+  def flatMap[B](transformer: MyTransformer[A, MyGenericList[B]]): MyGenericList[B] = {
+    transformer.transform(h) ++ t.flatMap(transformer)
+  }
+
+  def ++[B >: A](list: MyGenericList[B]): MyGenericList[B] = {
+    new GCons(
+      h,
+      t ++ list
+    )
   }
 }
 
@@ -85,6 +106,7 @@ object GenericListTest extends App {
   val doubleTransformer = new DoubleTransformer
   val intToStringTransformer = new IntToStringTransformer
   val toUpperCaseTransformer = new StrToUpperCaseTransformer
+  val currentAndDoubleFlatMapTransformer = new CurrentAndDoubleFlatMapTransformer
 
   val evenPredicate = new EvenPredicate
   val fpLangPredicate = new FPLangPredicate(List("scala", "f#", "clojure", "elixir"))
@@ -116,4 +138,11 @@ object GenericListTest extends App {
   println("\nFiltered fp languages list\n")
   val filteredFPLangList = langsList.filter(fpLangPredicate)
   println(filteredFPLangList)
+
+  println("\nMapped current and double transformer list\n")
+  val currAndDoubleListFlatMapped = listInt.flatMap(currentAndDoubleFlatMapTransformer)
+  val currAndDoubleListMapped = listInt.map(currentAndDoubleFlatMapTransformer)
+  println(listInt)
+  println(currAndDoubleListFlatMapped)
+  println(currAndDoubleListMapped)
 }
