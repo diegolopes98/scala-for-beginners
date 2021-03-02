@@ -24,6 +24,8 @@ abstract class MyGenericList[+A] {
   def sort(fn: (A, A) => Int): MyGenericList[A]
 
   def zipWith[B >: A](anotherList: MyGenericList[B], zipFn: (A, B) => B): MyGenericList[B]
+
+  def fold[B >: A](acc: B)(function: (B, B) => B): B
 }
 
 case object GEmpty extends MyGenericList[Nothing] {
@@ -41,6 +43,7 @@ case object GEmpty extends MyGenericList[Nothing] {
   def forEach(fn: Nothing => Unit): Unit = ()
   def sort(fn: (Nothing, Nothing) => Int): MyGenericList[Nothing] = GEmpty
   def zipWith[B >: Nothing](anotherList: MyGenericList[B], zipFn: (Nothing, B) => B): MyGenericList[B] = GEmpty
+  def fold[B >: Nothing](acc: B)(function: (B, B) => B): B = acc
 }
 
 case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
@@ -89,6 +92,10 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
       tail().zipWith(list.tail(), zipFn)
     )
   }
+
+  def fold[B >: A](acc: B)(function: (B, B) => B): B = {
+    t.fold(function(acc, h))(function)
+  }
 }
 
 object GenericListTest extends App {
@@ -104,5 +111,7 @@ object GenericListTest extends App {
   println(listInt.toString())
   println(listInt2.toString())
   println(listInt2.zipWith(listInt, (x: Int, y: Int) => x * y))
+
+  println(listInt2.fold(0)(_ + _))
 
 }
