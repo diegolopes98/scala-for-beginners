@@ -50,7 +50,7 @@ abstract class MyGenericList[+A] {
   def ++[ B >: A](list: MyGenericList[B]): MyGenericList[B]
 }
 
-object GEmpty extends MyGenericList[Nothing] {
+case object GEmpty extends MyGenericList[Nothing] {
   def head(): Nothing = throw new NoSuchElementException
   def tail(): MyGenericList[Nothing] = throw new NoSuchElementException
   def isEmpty(): Boolean = true
@@ -63,11 +63,11 @@ object GEmpty extends MyGenericList[Nothing] {
   def ++[ B >: Nothing](list: MyGenericList[B]): MyGenericList[B] = list
 }
 
-class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
+case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
   def head(): A = h
   def tail(): MyGenericList[A] = t
   def isEmpty(): Boolean = false
-  def add[ B >: A ](elem: B): MyGenericList[B] = new GCons(elem, this)
+  def add[ B >: A ](elem: B): MyGenericList[B] = GCons(elem, this)
 
   override def printElements(): String =
     if(t.isEmpty()) s"$h"
@@ -75,14 +75,13 @@ class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
 
 
   def map[B](transformer: MyTransformer[A, B]): MyGenericList[B] =
-    new GCons(
+    GCons(
       transformer.transform(h),
       t.map(transformer)
     )
 
   def filter(predicate: MyPredicate[A]): MyGenericList[A] = {
-    val condition = predicate.test(h)
-    if(condition) new GCons(h, t.filter(predicate))
+    if(predicate.test(h)) GCons(h, t.filter(predicate))
     else t.filter(predicate)
   }
 
@@ -91,7 +90,7 @@ class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
   }
 
   def ++[B >: A](list: MyGenericList[B]): MyGenericList[B] = {
-    new GCons(
+    GCons(
       h,
       t ++ list
     )
@@ -99,9 +98,9 @@ class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
 }
 
 object GenericListTest extends App {
-  val listInt: MyGenericList[Int] = new GCons(1, new GCons(2, new GCons(3, new GCons(4, GEmpty))))
-  val listStr: MyGenericList[String] = new GCons("Hello", new GCons("Scala", GEmpty))
-  val langsList: MyGenericList[String]  = new GCons("Elixir", new GCons("Scala", new GCons("Java", GEmpty)))
+  val listInt: MyGenericList[Int] = GCons(1, GCons(2, GCons(3, GCons(4, GEmpty))))
+  val listStr: MyGenericList[String] = GCons("Hello", GCons("Scala", GEmpty))
+  val langsList: MyGenericList[String]  = GCons("Elixir", GCons("Scala", GCons("Java", GEmpty)))
 
   val doubleTransformer = new DoubleTransformer
   val intToStringTransformer = new IntToStringTransformer
@@ -111,7 +110,7 @@ object GenericListTest extends App {
   val evenPredicate = new EvenPredicate
   val fpLangPredicate = new FPLangPredicate(List("scala", "f#", "clojure", "elixir"))
 
-  println(listInt)
+  println(listInt.toString)
 
 
   println("\nMapped int list\n")
