@@ -23,7 +23,7 @@ abstract class MyGenericList[+A] {
 
   def sort(fn: (A, A) => Int): MyGenericList[A]
 
-  def zipWith[B >: A](anotherList: MyGenericList[B], zipFn: (A, B) => B): MyGenericList[B]
+  def zipWith[B >: A, C](anotherList: MyGenericList[B], zipFn: (A, B) => C): MyGenericList[C]
 
   def fold[B >: A](acc: B)(function: (B, B) => B): B
 }
@@ -42,7 +42,10 @@ case object GEmpty extends MyGenericList[Nothing] {
 
   def forEach(fn: Nothing => Unit): Unit = ()
   def sort(fn: (Nothing, Nothing) => Int): MyGenericList[Nothing] = GEmpty
-  def zipWith[B >: Nothing](anotherList: MyGenericList[B], zipFn: (Nothing, B) => B): MyGenericList[B] = GEmpty
+  def zipWith[B >: Nothing, C](anotherList: MyGenericList[B], zipFn: (Nothing, B) => C): MyGenericList[C] = {
+    if (!anotherList.isEmpty()) throw new Exception("Lists do not have the same length")
+    GEmpty
+  }
   def fold[B >: Nothing](acc: B)(function: (B, B) => B): B = acc
 }
 
@@ -95,10 +98,11 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
     insert(h, sortedTail)
   }
 
-  def zipWith[B >: A](list: MyGenericList[B], zipFn: (A, B) => B): MyGenericList[B] = {
-    GCons(
-      zipFn(head(), list.head()),
-      tail().zipWith(list.tail(), zipFn)
+  def zipWith[B >: A, C](anotherList: MyGenericList[B], zipFn: (A, B) => C): MyGenericList[C] = {
+    if (anotherList.isEmpty()) throw new Exception("Lists do not have the same length")
+    GCons[C](
+      zipFn(head(), anotherList.head()),
+      tail().zipWith(anotherList.tail(), zipFn)
     )
   }
 
