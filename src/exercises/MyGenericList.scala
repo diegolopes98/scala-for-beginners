@@ -1,5 +1,7 @@
 package exercises
 
+import scala.annotation.tailrec
+
 abstract class MyGenericList[+A] {
   def head(): A
   def tail(): MyGenericList[A]
@@ -16,6 +18,10 @@ abstract class MyGenericList[+A] {
 
   // concatenation
   def ++[ B >: A](list: MyGenericList[B]): MyGenericList[B]
+
+  def forEach(fn: A => Unit): Unit
+
+  def sort(fn: (A, A) => Int): MyGenericList[A]
 }
 
 case object GEmpty extends MyGenericList[Nothing] {
@@ -29,6 +35,10 @@ case object GEmpty extends MyGenericList[Nothing] {
   def filter(predicate: Nothing => Boolean): MyGenericList[Nothing] = this
   def flatMap[B](transformer: Nothing => MyGenericList[B]): MyGenericList[B] = this
   def ++[ B >: Nothing](list: MyGenericList[B]): MyGenericList[B] = list
+
+  def forEach(fn: Nothing => Unit): Unit = ()
+  def sort(fn: (Nothing, Nothing) => Int): MyGenericList[Nothing] = GEmpty
+
 }
 
 case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
@@ -63,10 +73,19 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
       t ++ list
     )
   }
+
+  def forEach(fn: A => Unit): Unit = {
+    fn(h)
+    t.forEach(fn)
+  }
+
+  def sort(sortFn: (A, A) => Int): MyGenericList[A] = this
+
 }
 
 object GenericListTest extends App {
   val listInt: MyGenericList[Int] = GCons(1, GCons(2, GCons(3, GCons(4, GEmpty))))
+  val listInt2: MyGenericList[Int] = GCons(2, GCons(3, GCons(1, GCons(4, GEmpty))))
 
   val doubler = (n: Int) => 2 * n
 
@@ -74,9 +93,8 @@ object GenericListTest extends App {
 
   val doublerList = (n: Int) => GCons(n, GCons(n * 2, GEmpty))
 
-  println(listInt)
-  println(listInt.filter(evenCheck))
-  println(listInt.map(doubler))
-  println(listInt.map(doublerList))
-  println(listInt.flatMap(doublerList))
+  println(listInt.toString())
+  println(listInt.sort((a, b) => b - a).toString())
+  println(listInt2.sort((a, b) => b - a).toString())
+
 }
