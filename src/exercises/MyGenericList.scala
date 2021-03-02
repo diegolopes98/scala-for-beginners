@@ -22,6 +22,8 @@ abstract class MyGenericList[+A] {
   def forEach(fn: A => Unit): Unit
 
   def sort(fn: (A, A) => Int): MyGenericList[A]
+
+  def zipWith[B >: A](anotherList: MyGenericList[B], zipFn: (A, B) => B): MyGenericList[B]
 }
 
 case object GEmpty extends MyGenericList[Nothing] {
@@ -38,7 +40,7 @@ case object GEmpty extends MyGenericList[Nothing] {
 
   def forEach(fn: Nothing => Unit): Unit = ()
   def sort(fn: (Nothing, Nothing) => Int): MyGenericList[Nothing] = GEmpty
-
+  def zipWith[B >: Nothing](anotherList: MyGenericList[B], zipFn: (Nothing, B) => B): MyGenericList[B] = GEmpty
 }
 
 case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
@@ -81,11 +83,17 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
 
   def sort(sortFn: (A, A) => Int): MyGenericList[A] = this
 
+  def zipWith[B >: A](list: MyGenericList[B], zipFn: (A, B) => B): MyGenericList[B] = {
+    GCons(
+      zipFn(head(), list.head()),
+      tail().zipWith(list.tail(), zipFn)
+    )
+  }
 }
 
 object GenericListTest extends App {
   val listInt: MyGenericList[Int] = GCons(1, GCons(2, GCons(3, GCons(4, GEmpty))))
-  val listInt2: MyGenericList[Int] = GCons(2, GCons(3, GCons(1, GCons(4, GEmpty))))
+  val listInt2: MyGenericList[Int] = GCons(2, GCons(3, GCons(4, GCons(5, GEmpty))))
 
   val doubler = (n: Int) => 2 * n
 
@@ -94,7 +102,7 @@ object GenericListTest extends App {
   val doublerList = (n: Int) => GCons(n, GCons(n * 2, GEmpty))
 
   println(listInt.toString())
-  println(listInt.sort((a, b) => b - a).toString())
-  println(listInt2.sort((a, b) => b - a).toString())
+  println(listInt2.toString())
+  println(listInt2.zipWith(listInt, (x: Int, y: Int) => x * y))
 
 }
