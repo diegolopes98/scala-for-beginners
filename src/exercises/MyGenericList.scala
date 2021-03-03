@@ -23,7 +23,7 @@ abstract class MyGenericList[+A] {
 
   def sort(fn: (A, A) => Int): MyGenericList[A]
 
-  def zipWith[B >: A, C](anotherList: MyGenericList[B], zipFn: (A, B) => C): MyGenericList[C]
+  def zipWith[B , C](anotherList: MyGenericList[B], zipFn: (A, B) => C): MyGenericList[C]
 
   def fold[B >: A](acc: B)(function: (B, B) => B): B
 }
@@ -42,7 +42,7 @@ case object GEmpty extends MyGenericList[Nothing] {
 
   def forEach(fn: Nothing => Unit): Unit = ()
   def sort(fn: (Nothing, Nothing) => Int): MyGenericList[Nothing] = GEmpty
-  def zipWith[B >: Nothing, C](anotherList: MyGenericList[B], zipFn: (Nothing, B) => C): MyGenericList[C] = {
+  def zipWith[B, C](anotherList: MyGenericList[B], zipFn: (Nothing, B) => C): MyGenericList[C] = {
     if (!anotherList.isEmpty()) throw new Exception("Lists do not have the same length")
     GEmpty
   }
@@ -112,7 +112,7 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
     *
    */
 
-  def zipWith[B >: A, C](anotherList: MyGenericList[B], zipFn: (A, B) => C): MyGenericList[C] = {
+  def zipWith[B, C](anotherList: MyGenericList[B], zipFn: (A, B) => C): MyGenericList[C] = {
     if (anotherList.isEmpty()) throw new Exception("Lists do not have the same length")
     GCons[C](
       zipFn(head(), anotherList.head()),
@@ -127,17 +127,8 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
 
 object GenericListTest extends App {
   val listInt1: MyGenericList[Int] = GCons(1, GCons(2, GCons(3, GCons(4, GEmpty))))
-  val listInt2: MyGenericList[Int] = GCons(3, GCons(2, GCons(5, GCons(4, GEmpty))))
-  val listInt3: MyGenericList[Int] = GCons(100, GCons(0, GCons(50, GCons(-1, GEmpty))))
+  val listStr1: MyGenericList[String] = GCons("Scala", GCons("Elixir", GCons("F#", GCons("Clojure", GEmpty))))
 
-  val doubler = (n: Int) => 2 * n
-
-  val evenCheck = (n: Int) => n % 2 == 0
-
-  val doublerList = (n: Int) => GCons(n, GCons(n * 2, GEmpty))
-
-  println(listInt1.sort(_ - _).toString())
-  println(listInt2.sort(_ - _).toString())
-  println(listInt3.sort(_ - _).toString())
+  println(listInt1.zipWith(listStr1, (a: Int, b: String) => s"$a - $b").toString())
 
 }
