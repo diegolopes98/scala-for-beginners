@@ -19,7 +19,7 @@ abstract class MyGenericList[+A] {
   // concatenation
   def ++[ B >: A](list: MyGenericList[B]): MyGenericList[B]
 
-  def forEach(fn: A => Unit): Unit
+  def foreach(fn: A => Unit): Unit
 
   def sort(fn: (A, A) => Int): MyGenericList[A]
 
@@ -40,7 +40,7 @@ case object GEmpty extends MyGenericList[Nothing] {
   def flatMap[B](transformer: Nothing => MyGenericList[B]): MyGenericList[B] = this
   def ++[ B >: Nothing](list: MyGenericList[B]): MyGenericList[B] = list
 
-  def forEach(fn: Nothing => Unit): Unit = ()
+  def foreach(fn: Nothing => Unit): Unit = ()
   def sort(fn: (Nothing, Nothing) => Int): MyGenericList[Nothing] = GEmpty
   def zipWith[B, C](anotherList: MyGenericList[B], zipFn: (Nothing, B) => C): MyGenericList[C] = {
     if (!anotherList.isEmpty()) throw new Exception("Lists do not have the same length")
@@ -82,9 +82,9 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
     )
   }
 
-  def forEach(fn: A => Unit): Unit = {
+  def foreach(fn: A => Unit): Unit = {
     fn(h)
-    t.forEach(fn)
+    t.foreach(fn)
   }
 
   def sort(sortFn: (A, A) => Int): MyGenericList[A] = {
@@ -130,5 +130,9 @@ object GenericListTest extends App {
   val listStr1: MyGenericList[String] = GCons("Scala", GCons("Elixir", GCons("F#", GCons("Clojure", GEmpty))))
 
   println(listInt1.zipWith(listStr1, (a: Int, b: String) => s"$a - $b").toString())
+
+  val comprehensions =   for {
+    n <- listInt1
+  } println(n)
 
 }
