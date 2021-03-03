@@ -25,7 +25,7 @@ abstract class MyGenericList[+A] {
 
   def zipWith[B , C](anotherList: MyGenericList[B], zipFn: (A, B) => C): MyGenericList[C]
 
-  def fold[B >: A](acc: B)(function: (B, B) => B): B
+  def fold[B](acc: B)(function: (B, A) => B): B
 }
 
 case object GEmpty extends MyGenericList[Nothing] {
@@ -46,7 +46,7 @@ case object GEmpty extends MyGenericList[Nothing] {
     if (!anotherList.isEmpty()) throw new Exception("Lists do not have the same length")
     GEmpty
   }
-  def fold[B >: Nothing](acc: B)(function: (B, B) => B): B = acc
+  def fold[B](acc: B)(function: (B, Nothing) => B): B = acc
 }
 
 case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
@@ -120,7 +120,7 @@ case class GCons[+A](h: A, t: MyGenericList[A]) extends MyGenericList[A] {
     )
   }
 
-  def fold[B >: A](acc: B)(function: (B, B) => B): B = {
+  def fold[B](acc: B)(function: (B, A) => B): B = {
     t.fold(function(acc, h))(function)
   }
 }
